@@ -1,44 +1,16 @@
 package de.harm.test.mergetest;
 
-import lombok.Data;
-import org.hamcrest.Matchers;
+import static org.assertj.core.api.Assertions.assertThat;
+
+import de.harm.test.mergetest.model.SrcContainer;
+import de.harm.test.mergetest.model.SrcNested;
+import de.harm.test.mergetest.model.TargetContainer;
+import de.harm.test.mergetest.model.TargetNested;
+import java.util.Collections;
 import org.junit.Test;
 
-import java.util.Collections;
-import java.util.List;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.internal.bytebuddy.matcher.ElementMatchers.is;
-
 public class MergeTest {
-    @Data
-    public static class SrcContainer {
-        private String name;
-        private Integer number;
 
-        private List<String> roles;
-    }
-
-    @Data
-    public static class TargetContainer {
-        private String another;
-        private Integer count;
-        private int cnt;
-        private List<String> bones;
-    }
-
-    @Data
-    public static class SrcNested {
-        private String fire;
-
-        private SrcContainer srcContainer;
-    }
-    @Data
-    public static class TargetNested {
-        private String one;
-
-        private TargetContainer targetContainer;
-    }
     @Test
     public void simpleCopy() {
         MergeBean<SrcContainer,TargetContainer> cut=new MergeBean<>(SrcContainer.class,TargetContainer.class);
