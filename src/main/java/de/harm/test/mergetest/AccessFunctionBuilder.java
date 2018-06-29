@@ -1,15 +1,18 @@
 package de.harm.test.mergetest;
 
 import java.beans.PropertyDescriptor;
+import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.List;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.util.StringUtils;
 
+@Slf4j
 public class AccessFunctionBuilder {
 
   private List<String> convert2PathElements(String path) {
@@ -88,12 +91,36 @@ public class AccessFunctionBuilder {
         throw new IllegalArgumentException("No read access on:" + targetClass + " :" + top);
       }
 
+      Method topWriter = pdTop.getWriteMethod();
+      if (topWriter == null) {
+        throw new IllegalArgumentException("No writer access on:" + targetClass + " :" + top);
+      }
+      Constructor<?> topConstructor;
+      try {
+        topConstructor = topReader.getReturnType().getConstructor();
+      } catch (NoSuchMethodException e) {
+        throw new IllegalArgumentException(
+            "Missing (default) constructor off:" + topReader.getReturnType() + " used on:" + targetClass + " :" + top);
+      }
       BiConsumer restConsumer = getWriter(topReader.getReturnType(), rest.get(0), rest.subList(1, rest.size()));
       return new BiConsumer() {
         @Override
         public void accept(Object obj, Object value) {
           try {
             Object nextObj = topReader.invoke(obj);
+            if (nextObj == null) {
+
+              try {
+                log.trace("Create intermediate container:{} {}", targetClass, top);
+                nextObj = topConstructor.newInstance();
+                topWriter.invoke(obj, nextObj);
+
+              } catch (InstantiationException e) {
+                throw new IllegalStateException("Unable to create instance of:" + topConstructor.getDeclaringClass(),
+                    e);
+              }
+            }
+
             restConsumer.accept(nextObj, value);
           } catch (IllegalAccessException | InvocationTargetException e) {
             throw new IllegalArgumentException("Unable to set on:" + targetClass + " :" + top + " =" + value, e);
