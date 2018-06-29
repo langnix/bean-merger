@@ -1,5 +1,9 @@
 package de.harm.test.mergetest;
 
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.BeanUtils;
+import org.springframework.util.StringUtils;
+
 import java.beans.PropertyDescriptor;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
@@ -8,9 +12,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.BeanUtils;
-import org.springframework.util.StringUtils;
 
 @Slf4j
 public class AccessFunctionBuilder {
@@ -19,32 +20,35 @@ public class AccessFunctionBuilder {
     return Arrays.asList(StringUtils.tokenizeToStringArray(path, "."));
   }
 
-  public Function getReader(Class srcClass, String path) {
+  public AccessReader getReader(Class srcClass, String path) {
     return getReader(srcClass, convert2PathElements(path));
 
   }
-  private Function getReader(Class srcClass, List<String> path) {
+
+  private AccessReader getReader(Class srcClass, List<String> path) {
     return getReader(srcClass,path.get(0),path.subList(1,path.size()));
 
   }
-  private Function getReader(Class srcClass, String top,List<String> rest) {
+
+  private AccessReader getReader(Class srcClass, String top, List<String> rest) {
     PropertyDescriptor pdTop = BeanUtils.getPropertyDescriptor(srcClass, top);
     if (pdTop == null) {
       throw new IllegalArgumentException("Unknown property on:" + srcClass + " :" + top);
     }
     Method topReader = pdTop.getReadMethod();
     if (rest.isEmpty()) {
-      return (obj)-> {
+      return new AccessReader((obj) -> {
         try {
           return topReader.invoke(obj);
         } catch (IllegalAccessException | InvocationTargetException e) {
           throw new IllegalStateException("Unable to read on:" + srcClass + " :" + top);
         }
-      };
+      },
+          topReader.getReturnType());
     }
-    Function remFct = getReader(topReader.getReturnType(), rest.get(0), rest.subList(1, rest.size()));
+    AccessReader remFct = getReader(topReader.getReturnType(), rest.get(0), rest.subList(1, rest.size()));
 
-    return new Function() {
+    return new AccessReader(new Function() {
       @Override
       public Object apply(Object c) {
         try {
@@ -52,13 +56,14 @@ public class AccessFunctionBuilder {
           if (next == null) {
             return null;
           } else {
-            return remFct.apply(next);
+            return remFct.getReader().apply(next);
           }
         } catch (IllegalAccessException | InvocationTargetException e) {
           throw new IllegalStateException("Unable to read on:" + srcClass + " :" + top);
         }
       }
-    };
+    }, remFct.getValueClass());
+
 
   }
 

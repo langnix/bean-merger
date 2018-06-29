@@ -1,24 +1,24 @@
 package de.harm.test.mergetest;
 
-import static org.junit.Assert.assertThat;
-
 import de.harm.test.mergetest.model.SrcContainer;
 import de.harm.test.mergetest.model.SrcNested;
-import java.util.function.Function;
 import org.hamcrest.Matchers;
 import org.junit.Test;
+
+import static org.junit.Assert.assertThat;
 
 public class AccessFunctionBuilderTest {
 
   @Test
   public void simpleReaderStep() {
     AccessFunctionBuilder cut = new AccessFunctionBuilder();
-    Function rd = cut.getReader(SrcContainer.class, "name");
+    AccessReader rd = cut.getReader(SrcContainer.class, "name");
     SrcContainer obj = new SrcContainer();
     assertThat(rd.apply(obj), Matchers.nullValue());
 
     obj.setName("one");
     assertThat(rd.apply(obj), Matchers.is("one"));
+    assertThat("valueclass is the leaf class..", rd.getValueClass().toString(), Matchers.is(String.class.toString()));
 
   }
 
@@ -32,7 +32,7 @@ public class AccessFunctionBuilderTest {
   @Test
   public void simpleNestedReader() {
     AccessFunctionBuilder cut = new AccessFunctionBuilder();
-    Function rd = cut.getReader(SrcNested.class, "srcContainer.name");
+    AccessReader rd = cut.getReader(SrcNested.class, "srcContainer.name");
     SrcNested obj = new SrcNested();
 
     assertThat("missing container on path", rd.apply(obj), Matchers.nullValue());
@@ -42,6 +42,7 @@ public class AccessFunctionBuilderTest {
 
     obj.getSrcContainer().setName("hansi");
     assertThat(rd.apply(obj), Matchers.is("hansi"));
+    assertThat("valueclass is the leaf class..", rd.getValueClass().toString(), Matchers.is(String.class.toString()));
   }
 
   @Test(expected = IllegalArgumentException.class)
