@@ -23,19 +23,26 @@ public class AccessFunctionBuilder {
     return getReader(srcClass, convert2PathElements(path));
 
   }
-
   private Function getReader(Class srcClass, List<String> path) {
-    if (path.isEmpty()) {
-      return Function.identity();
-    }
-    String top = path.get(0);
+    return getReader(srcClass,path.get(0),path.subList(1,path.size()));
+
+  }
+  private Function getReader(Class srcClass, String top,List<String> rest) {
     PropertyDescriptor pdTop = BeanUtils.getPropertyDescriptor(srcClass, top);
     if (pdTop == null) {
       throw new IllegalArgumentException("Unknown property on:" + srcClass + " :" + top);
     }
     Method topReader = pdTop.getReadMethod();
-
-    Function remFct = getReader(topReader.getReturnType(), path.subList(1, path.size()));
+    if (rest.isEmpty()) {
+      return (obj)-> {
+        try {
+          return topReader.invoke(obj);
+        } catch (IllegalAccessException | InvocationTargetException e) {
+          throw new IllegalStateException("Unable to read on:" + srcClass + " :" + top);
+        }
+      };
+    }
+    Function remFct = getReader(topReader.getReturnType(), rest.get(0), rest.subList(1, rest.size()));
 
     return new Function() {
       @Override
