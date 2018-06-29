@@ -1,8 +1,9 @@
 package de.harm.test.mergetest;
 
 
-import java.util.function.BiConsumer;
 import lombok.Data;
+
+import java.util.function.BiConsumer;
 
 @Data
 public class AccessWriter {

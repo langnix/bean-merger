@@ -1,7 +1,8 @@
 package de.harm.test.mergetest;
 
-import java.util.function.Function;
 import lombok.Data;
+
+import java.util.function.Function;
 
 @Data
 public class MergePropertyDefinition<S, T> {

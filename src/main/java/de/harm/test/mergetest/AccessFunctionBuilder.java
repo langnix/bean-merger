@@ -26,7 +26,7 @@ public class AccessFunctionBuilder {
   }
 
   private AccessReader getReader(Class srcClass, List<String> path) {
-    return getReader(srcClass,path.get(0),path.subList(1,path.size()));
+    return getReader(srcClass, path.get(0), path.subList(1, path.size()));
 
   }
 
@@ -89,14 +89,14 @@ public class AccessFunctionBuilder {
       return new AccessWriter(
 
           new BiConsumer() {
-        @Override
-        public void accept(Object obj, Object value) {
-          try {
-            topWriter.invoke(obj, value);
-          } catch (IllegalAccessException | InvocationTargetException e) {
-            throw new IllegalArgumentException("Unable to set on:" + targetClass + " :" + top + " =" + value, e);
-          }
-        }
+            @Override
+            public void accept(Object obj, Object value) {
+              try {
+                topWriter.invoke(obj, value);
+              } catch (IllegalAccessException | InvocationTargetException e) {
+                throw new IllegalArgumentException("Unable to set on:" + targetClass + " :" + top + " =" + value, e);
+              }
+            }
           },
           topWriter.getParameters()[0].getType())
           ;
