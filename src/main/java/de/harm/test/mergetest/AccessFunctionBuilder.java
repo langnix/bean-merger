@@ -55,15 +55,15 @@ public class AccessFunctionBuilder {
 
   }
 
-  public BiConsumer getWriter(Class targetClass, String path) {
+  public AccessWriter getWriter(Class targetClass, String path) {
     return getWriter(targetClass, convert2PathElements(path));
   }
 
-  private BiConsumer getWriter(Class targetClass, List<String> path) {
+  private AccessWriter getWriter(Class targetClass, List<String> path) {
     return getWriter(targetClass, path.get(0), path.subList(1, path.size()));
   }
 
-  private BiConsumer getWriter(Class targetClass, String top, List<String> rest) {
+  private AccessWriter getWriter(Class targetClass, String top, List<String> rest) {
     PropertyDescriptor pdTop = BeanUtils.getPropertyDescriptor(targetClass, top);
     if (pdTop == null) {
       throw new IllegalArgumentException("Unknown property on:" + targetClass + " :" + top);
@@ -74,7 +74,9 @@ public class AccessFunctionBuilder {
       if (topWriter == null) {
         throw new IllegalArgumentException("No writer access on:" + targetClass + " :" + top);
       }
-      return new BiConsumer() {
+      return new AccessWriter(
+
+          new BiConsumer() {
         @Override
         public void accept(Object obj, Object value) {
           try {
@@ -83,7 +85,9 @@ public class AccessFunctionBuilder {
             throw new IllegalArgumentException("Unable to set on:" + targetClass + " :" + top + " =" + value, e);
           }
         }
-      };
+          },
+          topWriter.getParameters()[0].getType())
+          ;
     } else {
       // read the prop
       Method topReader = pdTop.getReadMethod();
@@ -102,8 +106,9 @@ public class AccessFunctionBuilder {
         throw new IllegalArgumentException(
             "Missing (default) constructor off:" + topReader.getReturnType() + " used on:" + targetClass + " :" + top);
       }
-      BiConsumer restConsumer = getWriter(topReader.getReturnType(), rest.get(0), rest.subList(1, rest.size()));
-      return new BiConsumer() {
+      AccessWriter restConsumer = getWriter(topReader.getReturnType(), rest.get(0), rest.subList(1, rest.size()));
+
+      return new AccessWriter(new BiConsumer() {
         @Override
         public void accept(Object obj, Object value) {
           try {
@@ -126,7 +131,8 @@ public class AccessFunctionBuilder {
             throw new IllegalArgumentException("Unable to set on:" + targetClass + " :" + top + " =" + value, e);
           }
         }
-      };
+      },
+          restConsumer.getValueClass());
     }
   }
 
