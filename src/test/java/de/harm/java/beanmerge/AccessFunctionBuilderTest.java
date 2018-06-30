@@ -1,7 +1,7 @@
-package de.harm.test.mergetest;
+package de.harm.java.beanmerge;
 
-import de.harm.test.mergetest.model.SrcContainer;
-import de.harm.test.mergetest.model.SrcNested;
+import de.harm.java.beanmerge.model.SrcContainer;
+import de.harm.java.beanmerge.model.SrcNested;
 import org.hamcrest.Matchers;
 import org.junit.Test;
 

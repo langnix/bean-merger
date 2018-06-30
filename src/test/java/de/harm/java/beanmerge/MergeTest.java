@@ -1,9 +1,9 @@
-package de.harm.test.mergetest;
+package de.harm.java.beanmerge;
 
-import de.harm.test.mergetest.model.SrcContainer;
-import de.harm.test.mergetest.model.SrcNested;
-import de.harm.test.mergetest.model.TargetContainer;
-import de.harm.test.mergetest.model.TargetNested;
+import de.harm.java.beanmerge.model.SrcContainer;
+import de.harm.java.beanmerge.model.SrcNested;
+import de.harm.java.beanmerge.model.TargetContainer;
+import de.harm.java.beanmerge.model.TargetNested;
 import org.junit.Test;
 
 import java.util.Collections;

@@ -1,4 +1,4 @@
-package de.harm.test.mergetest;
+package de.harm.java.beanmerge;
 
 import lombok.Data;
 
