@@ -10,7 +10,7 @@ import java.util.Collections;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class MergeTest {
+public class MergeBeanTest {
 
   @Test
   public void simpleCopy() {

@@ -4,7 +4,6 @@ import lombok.Data;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.function.Function;
 
 @Data
 public class MergeBean<S, T> {
@@ -14,9 +13,9 @@ public class MergeBean<S, T> {
   private Collection<MergePropertyDefinition> mergePropertyDefinitions = new ArrayList<>();
 
   public void addMapping(String leftProp, String rightProp) {
-    Function<S, ?> rd = accessFunctionBuilder.getReader(leftClass, leftProp);
-
-    mergePropertyDefinitions.add(new MergePropertyDefinition(leftProp, rd, rightProp));
+    AccessReader leftRd = accessFunctionBuilder.getReader(leftClass, leftProp);
+    AccessWriter rightWr = accessFunctionBuilder.getWriter(rightClass, rightProp);
+    mergePropertyDefinitions.add(new MergePropertyDefinition(leftProp, leftRd, rightProp, rightWr));
   }
 
 
@@ -28,6 +27,7 @@ public class MergeBean<S, T> {
   private void merge(MergePropertyDefinition pd, S source, T target) {
 //        try {
     Object value = pd.getLeftRead().apply(source);
+    pd.getRigthWriter().accept(target, value);
 //            pd.getRightWrite().invoke(target, value);
 //        } catch (IllegalAccessException | InvocationTargetException e) {
 //            throw new IllegalArgumentException("Unable to copy:" + pd.getLeftProp() + "->" + pd.getRightProp());

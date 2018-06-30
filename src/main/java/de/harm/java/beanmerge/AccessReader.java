@@ -8,6 +8,7 @@ import java.util.function.Function;
 @Data
 public class AccessReader implements Function {
 
+
   private final Function reader;
   private final Class valueClass;
 
